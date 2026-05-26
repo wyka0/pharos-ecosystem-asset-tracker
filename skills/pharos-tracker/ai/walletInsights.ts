@@ -1,4 +1,4 @@
-import { getProvider, callContract, getLogs } from '../services/rpc.js';
+import { getProvider, callContract, getLogsBatched } from '../services/rpc.js';
 import { TRANSFER_EVENT_TOPIC } from '../utils/constants.js';
 
 interface WalletInsight {
@@ -17,7 +17,7 @@ export async function analyzeWallet(address: string): Promise<WalletInsight> {
 
   // Get incoming transfers
   const paddedAddr = `0x000000000000000000000000${address.replace('0x', '').toLowerCase()}`;
-  const incomingLogs = await getLogs(fromBlock, currentBlock, undefined, [
+  const incomingLogs = await getLogsBatched(fromBlock, currentBlock, undefined, [
     TRANSFER_EVENT_TOPIC,
     null,
     null,
@@ -25,7 +25,7 @@ export async function analyzeWallet(address: string): Promise<WalletInsight> {
   ]);
 
   // Get outgoing transfers
-  const outgoingLogs = await getLogs(fromBlock, currentBlock, undefined, [
+  const outgoingLogs = await getLogsBatched(fromBlock, currentBlock, undefined, [
     TRANSFER_EVENT_TOPIC,
     paddedAddr,
     null,

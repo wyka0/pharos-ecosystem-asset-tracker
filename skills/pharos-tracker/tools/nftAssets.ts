@@ -1,4 +1,4 @@
-import { getProvider, callContract, getLogs } from '../services/rpc.js';
+import { getProvider, callContract, getLogsBatched } from '../services/rpc.js';
 import { ERC20, TRANSFER_EVENT_TOPIC } from '../utils/constants.js';
 
 interface NFTBalance {
@@ -27,7 +27,7 @@ export async function getNFTBalances(address: string): Promise<NFTBalance[]> {
   const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
   const paddedAddr = `0x000000000000000000000000${address.replace('0x', '').toLowerCase()}`;
 
-  const logs = await getLogs(fromBlock, currentBlock, undefined, [
+  const logs = await getLogsBatched(fromBlock, currentBlock, undefined, [
     transferTopic,
     null,
     null,
