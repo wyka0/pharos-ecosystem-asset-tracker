@@ -10,7 +10,7 @@ export async function getContractABI(address: string): Promise<string | null> {
   const url = `${PHAROSSCAN_API_URL}?module=contract&action=getabi&address=${address}`;
   try {
     const res = await fetch(url);
-    const data: ContractQueryResult = await res.json();
+    const data = await res.json() as ContractQueryResult;
     if (data.status === '1') return data.result;
     return null;
   } catch {

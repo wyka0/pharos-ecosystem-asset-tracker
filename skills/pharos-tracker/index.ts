@@ -1,6 +1,6 @@
 export { walletBalance } from './tools/walletBalance.js';
-export { getTokenBalances, discoverTokens } from './tools/tokenAssets.js';
-export { getNFTs } from './tools/nftAssets.js';
+export { getTokenBalances, getNativeBalance } from './tools/tokenAssets.js';
+export { getNFTBalances } from './tools/nftAssets.js';
 export { getDeFiPositions } from './tools/defiPositions.js';
 export { getTxHistory } from './tools/txHistory.js';
 export { getEcosystemStats } from './tools/ecosystemStats.js';

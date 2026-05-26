@@ -77,7 +77,7 @@ export async function calculateRealFiExposure(
   }
 
   // Add WPROS as RealFi if held (wrapped variant)
-  const wpros = tokenData.find(t => t.symbol === 'WPROS');
+  const wpros = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'WPROS');
   if (wpros && wpros.balance > 0) {
     realWorldAssets.push({
       symbol: 'WPROS',

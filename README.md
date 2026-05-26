@@ -70,8 +70,8 @@ Each query maps to one or more modules above. The AI engines (portfolioSummary, 
     ├── AGENT.md               # Agent behavior instructions
     ├── index.ts               # Module exports
     ├── manifest.json          # Skill metadata
-    ├── ai/                    # AI engines (10 modules)
-    ├── tools/                 # On-chain tools (6 modules)
+    ├── ai/                    # AI engines (4 modules)
+    ├── tools/                 # On-chain tools (12 modules)
     ├── services/              # RPC and API service layer
     ├── prompts/               # Agent prompt templates
     └── utils/                 # Constants, formatters, helpers

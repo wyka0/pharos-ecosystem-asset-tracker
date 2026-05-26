@@ -104,7 +104,7 @@ async function main() {
   header('PORTFOLIO SCORE');
   const ps = await safe(() => scorePortfolio(addr), null);
   if (ps) {
-    const gradeColor: Record<string, chalk.Chalk> = { A: chalk.green, B: chalk.cyan, C: chalk.yellow, D: chalk.red, F: chalk.redBright };
+    const gradeColor: Record<string, typeof chalk.green> = { A: chalk.green, B: chalk.cyan, C: chalk.yellow, D: chalk.red, F: chalk.redBright };
     const gc = gradeColor[ps.grade] || chalk.white;
     section('Score', `${gc.bold(`Grade ${ps.grade}  (${ps.scores.overall}/100)`)}`);
     section('Score', [

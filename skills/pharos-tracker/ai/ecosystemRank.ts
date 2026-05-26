@@ -39,9 +39,9 @@ export async function rankWalletInEcosystem(
     ]);
 
     const nativePROS = Number(nativeBal) / 1e18;
-    const nonZeroTokens = tokenBals.filter(t => t.val > 0);
-    const usdcHolding = tokenBals.find(t => t.symbol === 'USDC')?.val || 0;
-    const hasDeFi = nonZeroTokens.some(t => t.symbol !== 'USDC');
+    const nonZeroTokens = tokenBals.filter((t: { symbol: string; val: number }) => t.val > 0);
+    const usdcHolding = tokenBals.find((t: { symbol: string; val: number }) => t.symbol === 'USDC')?.val || 0;
+    const hasDeFi = nonZeroTokens.some((t: { symbol: string; val: number }) => t.symbol !== 'USDC');
 
     const valueScore = Math.round(nativePROS * 100 + usdcHolding * 60);
 

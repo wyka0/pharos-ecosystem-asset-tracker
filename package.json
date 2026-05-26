@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A skill-based asset tracker for the Pharos Network (chain 1672) ecosystem — native PROS, ERC-20 tokens, NFTs, DeFi positions, and AI-powered portfolio insights.",
   "type": "module",
-  "main": "skills/pharos-tracker/tools/walletBalance.ts",
+  "main": "skills/pharos-tracker/index.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch skills/pharos-tracker/main.ts",

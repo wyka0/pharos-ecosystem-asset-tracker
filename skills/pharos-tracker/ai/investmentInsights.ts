@@ -36,10 +36,10 @@ export async function generateInvestmentInsights(
   ]);
 
   const nativePROS = Number(nativeBal) / 1e18;
-  const usdcBal = tokenData.find(t => t.symbol === 'USDC')?.balance || 0;
-  const linkBal = tokenData.find(t => t.symbol === 'LINK')?.balance || 0;
-  const wethBal = tokenData.find(t => t.symbol === 'WETH')?.balance || 0;
-  const wprosBal = tokenData.find(t => t.symbol === 'WPROS')?.balance || 0;
+  const usdcBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'USDC')?.balance || 0;
+  const linkBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'LINK')?.balance || 0;
+  const wethBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'WETH')?.balance || 0;
+  const wprosBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'WPROS')?.balance || 0;
 
   // 1. PROS diversification signal
   if (nativePROS > 100 && nativePROS / (nativePROS + usdcBal + wethBal) > 0.7) {

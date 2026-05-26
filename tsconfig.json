@@ -7,14 +7,14 @@
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
+    "noImplicitAny": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
     "sourceMap": true
   },
-  "include": ["skills/**/*.ts", "examples/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["skills/**/*.ts", "examples/**/*.ts", "main.ts"],
+  "exclude": ["node_modules", "dist", "skills/pharos-tracker/services/alchemy.ts", "skills/pharos-tracker/services/covalent.ts"]
 }

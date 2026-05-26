@@ -30,14 +30,14 @@ export async function scorePortfolio(address: string): Promise<PortfolioScoreRes
   ]);
 
   const nativeValue = Number(nativeBal) / 1e18;
-  const tokenBalances = tokenData.filter(t => t.balance > 0n);
+  const tokenBalances = tokenData.filter((t: { balance: bigint }) => t.balance > 0n);
 
   // Diversification: number of asset types held
   const assetCount = (nativeValue > 0 ? 1 : 0) + tokenBalances.length;
   const diversification = Math.min(100, assetCount * 25);
 
   // Risk: concentration check
-  const totalValue = nativeValue + tokenBalances.reduce((s, t) => s + Number(t.balance) / 10 ** t.decimals, 0);
+  const totalValue = nativeValue + tokenBalances.reduce((s: number, t: { balance: bigint; decimals: number }) => s + Number(t.balance) / 10 ** t.decimals, 0);
   let riskScore = 0;
   const strengths: string[] = [];
   const weaknesses: string[] = [];
@@ -53,7 +53,7 @@ export async function scorePortfolio(address: string): Promise<PortfolioScoreRes
       strengths.push('Good diversification across asset types');
     }
 
-    if (tokenBalances.some(t => t.protocol === 'Stablecoin')) {
+    if (tokenBalances.some((t: { protocol: string }) => t.protocol === 'Stablecoin')) {
       strengths.push('Stablecoin holdings reduce volatility');
     }
 
@@ -69,7 +69,7 @@ export async function scorePortfolio(address: string): Promise<PortfolioScoreRes
   const activity = Math.min(100, assetCount * 20);
 
   // DeFi participation
-  const defiTokens = tokenBalances.filter(t => t.protocol !== 'Stablecoin' && t.protocol !== 'Bridge');
+  const defiTokens = tokenBalances.filter((t: { protocol: string }) => t.protocol !== 'Stablecoin' && t.protocol !== 'Bridge');
   const defiParticipation = Math.min(100, defiTokens.length * 33);
   if (defiTokens.length > 0) strengths.push('Active in DeFi protocols');
 
