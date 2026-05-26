@@ -2,7 +2,7 @@
 
 A skill-based asset tracker for the [Pharos Network](https://pharos.xyz) (Pacific Mainnet, chain 1672) — the RealFi Layer 1 for real-world asset tokenization.
 
-Track native PROS, ERC-20 tokens, NFTs, DeFi positions, and get AI-powered portfolio insights — all from a single CLI command.
+Track native PROS, ERC-20 tokens, NFTs, DeFi positions, and get AI-powered portfolio insights — all from a single CLI command. Each module is designed as an agent-callable skill/tool, making it composable for AI agent runtimes.
 
 ## Features
 
@@ -55,6 +55,28 @@ Scan for suspicious activity — wash trading or honeypot risks
 
 Each query maps to one or more modules above. The AI engines (portfolioSummary, walletInsights, riskEngine, investmentInsights) synthesize multi-tool results into natural-language answers.
 
+## Repository Structure
+
+```
+├── main.ts                    # Demo entry point (all 16 modules)
+├── demo.ps1                   # PowerShell demo launcher
+├── package.json               # Dependencies and scripts
+├── tsconfig.json              # TypeScript config
+├── LICENSE                    # MIT license
+├── README.md
+│
+└── skills/pharos-tracker/     # Composable skill directory
+    ├── SKILL.md               # Skill capabilities and triggers
+    ├── AGENT.md               # Agent behavior instructions
+    ├── index.ts               # Module exports
+    ├── manifest.json          # Skill metadata
+    ├── ai/                    # AI engines (10 modules)
+    ├── tools/                 # On-chain tools (6 modules)
+    ├── services/              # RPC and API service layer
+    ├── prompts/               # Agent prompt templates
+    └── utils/                 # Constants, formatters, helpers
+```
+
 ## Architecture
 
 ```
@@ -63,20 +85,26 @@ Each query maps to one or more modules above. The AI engines (portfolioSummary, 
                     └──────────┬──────────┘
                                │
               ┌────────────────▼────────────────┐
-              │       Agent (Skills Runtime)      │
+              │    Agent Runtime (opencode)      │
               └────────────────┬─────────────────┘
                                │
         ┌──────────────────────┼──────────────────────┐
         │                      │                      │
-  ┌─────▼──────┐    ┌─────────▼─────────┐    ┌───────▼──────┐
-  │   Tools    │    │     Services       │    │    AI Engines │
-  │ walletBal. │    │  rpc.ts (ethers)    │    │ portfolioSum │
-  │ tokenAsset │    │  pharosApi.ts       │    │ walletInsight│
-  │ nftAssets  │    │  alchemy.ts (opt.)  │    │ riskEngine   │
-  │ defiPos    │    │  covalent.ts (opt.) │    └──────────────┘
-  │ txHistory  │    └─────────────────────┘
-  │ ecoStats   │
-  └────────────┘
+  ┌─────▼──────────────────┐  ┌───────▼───────────┐  ┌───────▼───────────┐
+  │ On-chain Tools (12)    │  │ Services          │  │ AI Engines (4)    │
+  │ walletBalance          │  │ rpc.ts (ethers)   │  │ portfolioSummary  │
+  │ tokenAssets            │  │ pharosApi.ts      │  │ walletInsights    │
+  │ nftAssets              │  │ alchemy.ts (opt.) │  │ riskEngine        │
+  │ defiPositions          │  │ covalent.ts (opt.)│  │ investmentInsights│
+  │ txHistory              │  └───────────────────┘  └──────────────────┘
+  │ ecosystemStats         │
+  │ whaleDetection         │
+  │ suspiciousActivity     │
+  │ portfolioScore         │
+  │ ecosystemRank          │
+  │ daoScore               │
+  │ realfiExposure         │
+  └────────────────────────┘
 ```
 
 **Data flow:** Tools → Services (RPC calls) → Raw on-chain data → AI engines (portfolioSummary, walletInsights, riskEngine, investmentInsights, daoScore, whaleDetection, suspiciousActivity, realfiExposure) → Formatted output.
