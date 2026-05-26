@@ -27,33 +27,27 @@ Track native PROS, ERC-20 tokens, NFTs, DeFi positions, and get AI-powered portf
 
 ## Quick Start
 
+**Installation**
 ```bash
 git clone https://github.com/wyka0/pharos-ecosystem-asset-tracker
 cd pharos-ecosystem-asset-tracker
 npm install
 ```
 
-Run demo (all 16 modules):
-
+**Run Demo**
 ```bash
-npm run demo -- 0x3e5fdbcbdeaeb5faffaba18332f39bc751af415d
-```
-
-Track any wallet:
-
-```bash
-npm run wallet -- --address 0x...
+npm run demo -- 0xWalletAddress
 ```
 
 ## Example Agent Queries
 
 ```
-Analyze this wallet 0x7a0c09d89052eb39a942a1320673a946f4a2dfce
+Analyze this wallet 0xWalletAddress
 Detect risky assets in my portfolio
 Show whale activity on Pharos in the last 1000 blocks
 Calculate DAO participation score for this wallet
-Check RealFi exposure for 0x3e5fdbcbdeaeb5faffaba18332f39bc751af415d
-Summarize Pharos portfolio for 0x7a0c09d89052eb39a942a1320673a946f4a2dfce
+Check RealFi exposure for 0xWalletAddress
+Summarize Pharos portfolio for 0xWalletAddress
 Score and rank my portfolio in the Pharos ecosystem
 What are the investment insights for this address?
 Scan for suspicious activity — wash trading or honeypot risks
