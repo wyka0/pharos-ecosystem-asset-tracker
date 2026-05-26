@@ -42,18 +42,17 @@ npm run demo -- 0xWalletAddress
 ## Example Agent Queries
 
 ```
-Analyze this wallet 0xWalletAddress
-Detect risky assets in my portfolio
-Show whale activity on Pharos in the last 1000 blocks
-Calculate DAO participation score for this wallet
-Check RealFi exposure for 0xWalletAddress
-Summarize Pharos portfolio for 0xWalletAddress
-Score and rank my portfolio in the Pharos ecosystem
-What are the investment insights for this address?
-Scan for suspicious activity — wash trading or honeypot risks
+Analyze this wallet
+Generate a portfolio summary
+Detect whale activity
+Scan wallet security risks
+Analyze DAO participation
+Check RealFi exposure
+Show ecosystem ranking
+Generate AI investment insights
+Score this portfolio
+Analyze DeFi activity
 ```
-
-Each query maps to one or more modules above. The AI engines (portfolioSummary, walletInsights, riskEngine, investmentInsights) synthesize multi-tool results into natural-language answers.
 
 ## Repository Structure
 
