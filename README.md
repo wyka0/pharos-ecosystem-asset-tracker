@@ -28,21 +28,21 @@ Track native PROS, ERC-20 tokens, NFTs, DeFi positions, and get AI-powered portf
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-org/pharos-ecosystem-asset-tracker
+git clone https://github.com/wyka0/pharos-ecosystem-asset-tracker
 cd pharos-ecosystem-asset-tracker
 npm install
+```
+
+Run demo (all 16 modules):
+
+```bash
+npm run demo -- 0x3e5fdbcbdeaeb5faffaba18332f39bc751af415d
 ```
 
 Track any wallet:
 
 ```bash
-npm run wallet -- --address 0x7a0c09d89052eb39a942a1320673a946f4a2dfce
-```
-
-Run full portfolio:
-
-```bash
-npm run portfolio -- --address 0x7a0c09d89052eb39a942a1320673a946f4a2dfce --discover
+npm run wallet -- --address 0x...
 ```
 
 ## Example Agent Queries

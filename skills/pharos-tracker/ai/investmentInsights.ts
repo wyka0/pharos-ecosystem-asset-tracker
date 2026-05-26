@@ -58,7 +58,7 @@ export async function generateInvestmentInsights(
       type: 'defi_opportunity',
       title: 'Idle USDC can earn yield',
       description: `${usdcBal.toFixed(2)} USDC sitting idle`,
-      rationale: 'Deploy USDC into Pharos lending protocols or Uniswap V3 LP to earn passive yield',
+      rationale: 'Deploy USDC into Pharos lending or DEX liquidity pools to earn passive yield',
       confidence: 'high',
     });
   }
