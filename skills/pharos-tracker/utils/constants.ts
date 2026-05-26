@@ -16,6 +16,12 @@ export const PHAROSSCAN_API_URL =
 
 export const PROS_USD_PRICE = 0.614; // approximate, update as needed
 
+export const TOKEN_USD_PRICES: Record<string, number> = {
+  USDC: 1,
+  WETH: 1800,
+  LINK: 14,
+};
+
 // Verified token registry (from official Pharos docs)
 export const TOKEN_REGISTRY: Record<string, { symbol: string; name: string; decimals: number; protocol: string }> = {
   '0xc879c018db60520f4355c26ed1a6d572cdac1815': {

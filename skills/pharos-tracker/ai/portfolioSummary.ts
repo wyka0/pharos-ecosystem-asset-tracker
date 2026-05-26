@@ -1,5 +1,5 @@
 import { getProvider, callContract } from '../services/rpc.js';
-import { TOKEN_REGISTRY, ERC20, PROS_USD_PRICE } from '../utils/constants.js';
+import { TOKEN_REGISTRY, ERC20, PROS_USD_PRICE, TOKEN_USD_PRICES } from '../utils/constants.js';
 import { formatUnits, formatUSD } from '../utils/format.js';
 
 interface PortfolioEntry {
@@ -38,12 +38,13 @@ export async function summarize(address: string): Promise<string> {
   for (const t of tokenRaw) {
     if (t.bal > 0n) {
       const formatted = formatUnits(t.bal, t.meta.decimals);
+      const price = TOKEN_USD_PRICES[t.meta.symbol] || 0;
       entries.push({
         type: 'token',
         symbol: t.meta.symbol,
         name: t.meta.name,
         balance: formatted,
-        usdValue: 0, // No price oracle available
+        usdValue: Number(t.bal) / 10 ** t.meta.decimals * price,
         protocol: t.meta.protocol,
       });
     }
