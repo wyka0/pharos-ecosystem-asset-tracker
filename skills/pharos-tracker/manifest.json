@@ -1,0 +1,43 @@
+{
+  "name": "pharos-tracker",
+  "version": "1.0.0",
+  "displayName": "Pharos Ecosystem Asset Tracker",
+  "description": "AI-powered asset tracker for Pharos Network (Pacific Mainnet, chain 1672) — native PROS, ERC-20 tokens, NFTs, DeFi positions, whale detection, portfolio scoring, DAO governance, RealFi exposure, and investment insights.",
+  "author": "",
+  "license": "MIT",
+  "framework": "TypeScript + ethers.js",
+  "runtime": "tsx / Node.js",
+  "chain": {
+    "name": "Pharos Pacific Mainnet",
+    "chainId": 1672,
+    "rpc": "https://rpc.pharos.xyz",
+    "explorer": "https://pharosscan.xyz"
+  },
+  "tools": {
+    "walletBalance": { "input": "address", "output": "PROS balance + USD value" },
+    "tokenAssets": { "input": "address, discover?", "output": "ERC-20 token list with balances" },
+    "nftAssets": { "input": "address", "output": "NFT count + collection list" },
+    "defiPositions": { "input": "address", "output": "Staked/LP/lending positions" },
+    "txHistory": { "input": "address, limit?", "output": "Recent transactions summary" },
+    "ecosystemStats": { "input": "—", "output": "Block height, TPS, gas price, tx count" },
+    "whaleDetection": { "input": "fromBlock, toBlock", "output": "Large transfers >$500, whale profiles" },
+    "suspiciousActivity": { "input": "address", "output": "Wash trading, honeypot, high-frequency flags" },
+    "portfolioScore": { "input": "address", "output": "4-dimension score (diversification/risk/activity/DeFi), grade A-F" },
+    "ecosystemRank": { "input": "wallets[], target", "output": "Ranked list by value, percentile" },
+    "daoScore": { "input": "address", "output": "Governance vote/delegation score 0-100" },
+    "realfiExposure": { "input": "address", "output": "RealFi exposure %, risk profile" },
+    "portfolioSummary": { "input": "address", "output": "Natural-language portfolio breakdown" },
+    "walletInsights": { "input": "address", "output": "Spend patterns, whale tags" },
+    "riskEngine": { "input": "address", "output": "Concentration risk, flags" },
+    "investmentInsights": { "input": "address", "output": "AI buy/sell/hold/diversify recommendations" }
+  },
+  "dependencies": {
+    "required": ["ethers", "chalk"],
+    "optional": ["viem", "zod", "dotenv"],
+    "devDependencies": ["tsx", "typescript", "@types/node"]
+  },
+  "keywords": [
+    "pharos", "pros", "real-fi", "rwa", "asset-tracker",
+    "wallet", "defi", "whale-detection", "dao", "portfolio-score"
+  ]
+}
