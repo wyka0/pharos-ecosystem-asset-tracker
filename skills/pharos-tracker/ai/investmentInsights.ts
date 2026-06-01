@@ -2,6 +2,7 @@ import { getProvider } from '../services/rpc.js';
 import { TOKEN_REGISTRY, ERC20 } from '../utils/constants.js';
 import { callContract } from '../services/rpc.js';
 import { scorePortfolio } from './portfolioScore.js';
+import { formatUnits } from 'ethers';
 
 interface Insight {
   type: 'buy' | 'sell' | 'hold' | 'diversify' | 'defi_opportunity' | 'risk_warning';
@@ -31,11 +32,11 @@ export async function generateInvestmentInsights(
     ...Object.entries(TOKEN_REGISTRY).map(async ([addr, meta]) => {
       const raw = await callContract(addr, ERC20.balanceOf(address));
       const bal = raw && raw !== '0x' ? BigInt(raw) : 0n;
-      return { addr, symbol: meta.symbol, balance: Number(bal) / 10 ** meta.decimals, protocol: meta.protocol };
+      return { addr, symbol: meta.symbol, balance: parseFloat(formatUnits(bal, meta.decimals)), protocol: meta.protocol };
     }),
   ]);
 
-  const nativePROS = Number(nativeBal) / 1e18;
+  const nativePROS = parseFloat(formatUnits(nativeBal, 18));
   const usdcBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'USDC')?.balance || 0;
   const linkBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'LINK')?.balance || 0;
   const wethBal = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'WETH')?.balance || 0;

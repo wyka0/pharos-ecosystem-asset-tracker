@@ -1,5 +1,6 @@
 import { getProvider, getLogsBatched, callContract } from '../services/rpc.js';
 import { TOKEN_REGISTRY, ERC20 } from '../utils/constants.js';
+import { formatUnits } from 'ethers';
 
 interface DAOActivity {
   type: 'vote_cast' | 'delegation' | 'proposal_created';
@@ -35,11 +36,11 @@ export async function calculateDAOScore(address: string): Promise<DAOParticipati
   for (const [tokenAddr, meta] of Object.entries(TOKEN_REGISTRY)) {
     try {
       const raw = await callContract(tokenAddr, ERC20.balanceOf(address));
-      const bal = raw && raw !== '0x' ? Number(BigInt(raw)) / 10 ** meta.decimals : 0;
+      const bal = raw && raw !== '0x' ? parseFloat(formatUnits(BigInt(raw).toString(), meta.decimals)) : 0;
       if (bal > 0) {
         governanceTokensHeld.push({ symbol: meta.symbol, balance: bal });
       }
-    } catch { /* skip */ }
+    } catch (err) { console.warn(`[DaoScore] Token balance probe failed: ${(err as Error).message}`); }
   }
 
   // Scan for VoteCast events (scoped to last 200 blocks to avoid large unfiltered scans)
@@ -60,7 +61,7 @@ export async function calculateDAOScore(address: string): Promise<DAOParticipati
         });
       }
     }
-  } catch { /* governance events may not exist on chain yet */ }
+  } catch (err) { console.warn(`[DaoScore] VoteCast log fetch failed: ${(err as Error).message}`); }
 
   // Scan for Delegation events
   try {
@@ -76,7 +77,7 @@ export async function calculateDAOScore(address: string): Promise<DAOParticipati
         });
       }
     }
-  } catch { /* governance events may not exist on chain yet */ }
+  } catch (err) { console.warn(`[DaoScore] Delegation log fetch failed: ${(err as Error).message}`); }
 
   // Compute score
   let score = 0;
@@ -112,6 +113,49 @@ export async function calculateDAOScore(address: string): Promise<DAOParticipati
     totalActivities: activities.length,
     activities: activities.reverse().slice(0, 20),
     governanceTokensHeld,
+    suggestions,
+  };
+}
+
+export interface DaoScoreResult {
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  breakdown: { hasGovernance: number; votes: number; delegations: number };
+  suggestions: string[];
+}
+
+export function calculateDaoScore(
+  hasGovernance: boolean,
+  voteCount: number,
+  delegateCount: number
+): DaoScoreResult {
+  let score = 0;
+  const suggestions: string[] = [];
+
+  if (hasGovernance) {
+    score += 30;
+  } else {
+    suggestions.push('Acquire governance tokens to participate in DAO voting');
+  }
+
+  score += Math.min(40, voteCount * 10);
+  score += Math.min(30, delegateCount * 10);
+
+  if (voteCount === 0 && hasGovernance) {
+    suggestions.push('Cast your first vote with your governance tokens');
+  }
+  if (delegateCount === 0 && hasGovernance) {
+    suggestions.push('Delegate your voting power to an active participant');
+  }
+
+  const capped = Math.min(100, score);
+  const grade: 'A' | 'B' | 'C' | 'D' | 'F' =
+    capped >= 80 ? 'A' : capped >= 60 ? 'B' : capped >= 40 ? 'C' : capped >= 20 ? 'D' : 'F';
+
+  return {
+    score: capped,
+    grade,
+    breakdown: { hasGovernance: hasGovernance ? 30 : 0, votes: Math.min(40, voteCount * 10), delegations: Math.min(30, delegateCount * 10) },
     suggestions,
   };
 }

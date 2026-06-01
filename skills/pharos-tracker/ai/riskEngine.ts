@@ -1,5 +1,6 @@
 import { getProvider, callContract } from '../services/rpc.js';
 import { TOKEN_REGISTRY, ERC20 } from '../utils/constants.js';
+import { formatUnits } from 'ethers';
 
 interface RiskReport {
   score: 'Low' | 'Medium' | 'High';
@@ -26,13 +27,13 @@ export async function assessRisk(address: string): Promise<RiskReport> {
     }),
   ]);
 
-  const nativeValue = Number(nativeBal) / 1e18;
+  const nativeValue = parseFloat(formatUnits(nativeBal, 18));
   let totalValue = nativeValue;
   const tokenValues: { symbol: string; value: number }[] = [];
 
   for (const t of tokenBals) {
     if (t.balance > 0n) {
-      const value = Number(t.balance) / 10 ** t.decimals;
+      const value = parseFloat(formatUnits(t.balance, t.decimals));
       tokenValues.push({ symbol: t.symbol, value });
     }
   }
@@ -71,4 +72,44 @@ export async function assessRisk(address: string): Promise<RiskReport> {
   }
 
   return risks;
+}
+
+export interface RiskAnalysis {
+  riskLevel: 'Low' | 'Medium' | 'High';
+  riskScore: number;
+  factors: string[];
+}
+
+export function analyzeRisk(
+  address: string,
+  txs: Array<{ status: string; to?: string; from?: string; value?: string }>,
+  unknownTokens: string[]
+): RiskAnalysis {
+  const total = txs.length;
+  const failed = txs.filter(t => t.status === 'failed').length;
+  const failureRate = total > 0 ? failed / total : 0;
+
+  let riskScore = 5;
+  const factors: string[] = [];
+
+  if (failureRate > 0.10) {
+    riskScore += 60;
+    factors.push(`High failure rate: ${(failureRate * 100).toFixed(1)}%`);
+  } else if (failureRate > 0.05) {
+    riskScore += 30;
+    factors.push(`Moderate failure rate: ${(failureRate * 100).toFixed(1)}%`);
+  } else if (failureRate > 0.02) {
+    riskScore += 10;
+    factors.push(`Some failed transactions`);
+  }
+
+  if (unknownTokens.length > 3) {
+    riskScore += 20;
+    factors.push(`Many unknown tokens: ${unknownTokens.length}`);
+  }
+
+  const riskLevel: 'Low' | 'Medium' | 'High' =
+    riskScore > 60 ? 'High' : riskScore > 30 ? 'Medium' : 'Low';
+
+  return { riskLevel, riskScore, factors };
 }

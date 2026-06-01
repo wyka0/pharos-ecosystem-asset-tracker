@@ -22,6 +22,40 @@ export const TOKEN_USD_PRICES: Record<string, number> = {
   LINK: 14,
 };
 
+export async function getProsPrice(): Promise<number> {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=pharos&vs_currencies=usd",
+      { signal: AbortSignal.timeout(5000) }
+    );
+    const data: any = await res.json();
+    return data?.pharos?.usd ?? 0.614;
+  } catch {
+    return 0.614;
+  }
+}
+
+export async function getTokenPrice(symbol: string): Promise<number | null> {
+  const idMap: Record<string, string> = {
+    WETH: "ethereum",
+    LINK: "chainlink",
+    USDC: "usd-coin",
+    WPROS: "pharos",
+  };
+  const id = idMap[symbol];
+  if (!id) return null;
+  try {
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    const data: any = await res.json();
+    return data?.[id]?.usd ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Verified token registry (from official Pharos docs)
 export const TOKEN_REGISTRY: Record<string, { symbol: string; name: string; decimals: number; protocol: string }> = {
   '0xc879c018db60520f4355c26ed1a6d572cdac1815': {

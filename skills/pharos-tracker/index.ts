@@ -5,7 +5,7 @@ export { getDeFiPositions } from './tools/defiPositions.js';
 export { getTxHistory } from './tools/txHistory.js';
 export { getEcosystemStats } from './tools/ecosystemStats.js';
 
-export { detectWhales, analyzeWhale, classifyWhale } from './ai/whaleDetection.js';
+export { detectWhales, detectWhalesInBlockRange, analyzeWhale, classifyWhale } from './ai/whaleDetection.js';
 export { scanSuspiciousActivity } from './ai/suspiciousActivity.js';
 export { scorePortfolio } from './ai/portfolioScore.js';
 export { rankWalletInEcosystem } from './ai/ecosystemRank.js';

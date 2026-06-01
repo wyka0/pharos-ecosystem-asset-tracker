@@ -1,5 +1,6 @@
 import { getProvider, getLogsBatched, getLogs } from '../services/rpc.js';
-import { TRANSFER_EVENT_TOPIC, TOKEN_REGISTRY, ERC20 } from '../utils/constants.js';
+import { TRANSFER_EVENT_TOPIC, TOKEN_REGISTRY, ERC20, getProsPrice, getTokenPrice } from '../utils/constants.js';
+import { formatUnits } from 'ethers';
 
 const WHALE_THRESHOLD_USD = 10000;
 
@@ -26,6 +27,30 @@ interface WhaleProfile {
 }
 
 export async function detectWhales(
+  address: string,
+  transfers: Array<{ token: string; value: number; from: string; to: string; timestamp?: number }>,
+  prosPrice: number
+): Promise<{ alert: string; classification: string; totalUSD: number }> {
+  let totalUSD = 0;
+  for (const t of transfers) {
+    const usdPrice = t.token === 'USDC' ? 1 : t.token === 'PROS' || t.token === 'WPROS' ? prosPrice : 0;
+    totalUSD += t.value * usdPrice;
+  }
+
+  let classification: string;
+  if (totalUSD >= 10000) classification = 'Mega Whale';
+  else if (totalUSD >= 1000) classification = 'Whale';
+  else if (totalUSD >= 100) classification = 'Dolphin';
+  else classification = 'Minnow';
+
+  return {
+    alert: `${classification} alert: ${transfers.length} transfer(s) detected for ${address} ($${totalUSD.toFixed(2)} USD)`,
+    classification,
+    totalUSD,
+  };
+}
+
+export async function detectWhalesInBlockRange(
   fromBlock: number,
   toBlock: number,
   minUsd: number = WHALE_THRESHOLD_USD
@@ -40,7 +65,7 @@ export async function detectWhales(
 
     for (const log of logs) {
       const value = BigInt(log.data!);
-      const formatted = Number(value) / 10 ** meta.decimals;
+      const formatted = parseFloat(formatUnits(value, meta.decimals));
 
       if (formatted >= minUsd) {
         whales.push({
@@ -66,6 +91,7 @@ export async function analyzeWhale(address: string): Promise<WhaleProfile> {
   const provider = getProvider();
   const currentBlock = await provider.getBlockNumber();
   const fromBlock = currentBlock - blocksToScan;
+  const prosPrice = await getProsPrice();
 
   const incoming: WhaleTransfer[] = [];
   const outgoing: WhaleTransfer[] = [];
@@ -80,8 +106,9 @@ export async function analyzeWhale(address: string): Promise<WhaleProfile> {
       const from = `0x${log.topics![1].slice(26)}`;
       const to = `0x${log.topics![2].slice(26)}`;
       const value = BigInt(log.data!);
-      const formatted = Number(value) / 10 ** meta.decimals;
-      const usdEstimate = meta.symbol === 'USDC' ? formatted : formatted * 0.614;
+      const formatted = parseFloat(formatUnits(value, meta.decimals));
+      const tokenPrice = await getTokenPrice(meta.symbol);
+      const usdEstimate = meta.symbol === 'USDC' ? formatted : formatted * (tokenPrice ?? prosPrice);
 
       const transfer: WhaleTransfer = {
         token: addr,

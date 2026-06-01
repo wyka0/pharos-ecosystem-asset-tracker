@@ -8,13 +8,13 @@ const provider = new ethers.JsonRpcProvider(PHAROS.rpcUrl, undefined, {
   staticNetwork: true,
 });
 
-provider.getRpcRequest && (provider as any)._start();
+(provider as any)._start?.();
 
 export function getProvider(): ethers.JsonRpcProvider {
   return provider;
 }
 
-async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
   let lastError: unknown;
   for (let i = 0; i < RETRIES; i++) {
     try {
@@ -45,6 +45,10 @@ export async function getGasPrice(): Promise<bigint> {
 
 export async function getBalance(address: string): Promise<bigint> {
   return withRetry(() => provider.getBalance(address));
+}
+
+export async function getTransactionCount(address: string): Promise<number> {
+  return withRetry(() => provider.getTransactionCount(address));
 }
 
 export async function getCode(address: string): Promise<string> {

@@ -1,5 +1,6 @@
 import { getProvider, callContract } from '../services/rpc.js';
-import { TRANSFER_EVENT_TOPIC } from '../utils/constants.js';
+import { TRANSFER_EVENT_TOPIC, getProsPrice } from '../utils/constants.js';
+import { formatUnits } from 'ethers';
 
 interface WalletBalance {
   address: string;
@@ -11,8 +12,10 @@ interface WalletBalance {
 export async function walletBalance(address: string): Promise<WalletBalance> {
   const provider = getProvider();
   const balance = await provider.getBalance(address);
-  const formatted = `${(Number(balance) / 1e18).toFixed(6)} PROS`;
-  const usdValue = (Number(balance) / 1e18) * 0.614;
+  const prosPrice = await getProsPrice();
+  const numeric = parseFloat(formatUnits(balance, 18));
+  const formatted = `${numeric.toFixed(6)} PROS`;
+  const usdValue = numeric * prosPrice;
 
   return {
     address,

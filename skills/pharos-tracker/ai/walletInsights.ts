@@ -1,5 +1,6 @@
 import { getProvider, callContract, getLogsBatched } from '../services/rpc.js';
 import { TRANSFER_EVENT_TOPIC } from '../utils/constants.js';
+import { formatUnits } from 'ethers';
 
 interface WalletInsight {
   totalIncoming: number;
@@ -17,20 +18,29 @@ export async function analyzeWallet(address: string): Promise<WalletInsight> {
 
   // Get incoming transfers
   const paddedAddr = `0x000000000000000000000000${address.replace('0x', '').toLowerCase()}`;
-  const incomingLogs = await getLogsBatched(fromBlock, currentBlock, undefined, [
-    TRANSFER_EVENT_TOPIC,
-    null,
-    null,
-    paddedAddr,
-  ]);
+  let incomingLogs: any[] = [];
+  let outgoingLogs: any[] = [];
+  try {
+    incomingLogs = await getLogsBatched(fromBlock, currentBlock, undefined, [
+      TRANSFER_EVENT_TOPIC,
+      null,
+      null,
+      paddedAddr,
+    ]);
+  } catch (err) {
+    console.warn(`[WalletInsights] Failed to fetch incoming logs: ${(err as Error).message}`);
+  }
 
-  // Get outgoing transfers
-  const outgoingLogs = await getLogsBatched(fromBlock, currentBlock, undefined, [
-    TRANSFER_EVENT_TOPIC,
-    paddedAddr,
-    null,
-    null,
-  ]);
+  try {
+    outgoingLogs = await getLogsBatched(fromBlock, currentBlock, undefined, [
+      TRANSFER_EVENT_TOPIC,
+      paddedAddr,
+      null,
+      null,
+    ]);
+  } catch (err) {
+    console.warn(`[WalletInsights] Failed to fetch outgoing logs: ${(err as Error).message}`);
+  }
 
   // Top counterparties
   const counterPartyMap = new Map<string, number>();

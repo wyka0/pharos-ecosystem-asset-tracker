@@ -3,7 +3,7 @@ import { walletBalance } from './skills/pharos-tracker/tools/walletBalance.js';
 import { getTokenBalances } from './skills/pharos-tracker/tools/tokenAssets.js';
 import { getEcosystemStats } from './skills/pharos-tracker/tools/ecosystemStats.js';
 import { summarize } from './skills/pharos-tracker/ai/portfolioSummary.js';
-import { detectWhales } from './skills/pharos-tracker/ai/whaleDetection.js';
+import { detectWhalesInBlockRange } from './skills/pharos-tracker/ai/whaleDetection.js';
 import { scanSuspiciousActivity } from './skills/pharos-tracker/ai/suspiciousActivity.js';
 import { scorePortfolio } from './skills/pharos-tracker/ai/portfolioScore.js';
 import { rankWalletInEcosystem } from './skills/pharos-tracker/ai/ecosystemRank.js';
@@ -81,7 +81,7 @@ async function main() {
   // Phase 2: Run all analytics modules in parallel (they're independent)
   header('WHALE DETECTION');
   const [whales, sec, ps, ranking, insights, dao, realfi, summary] = await Promise.all([
-    stats ? safe(() => detectWhales(stats.blockNumber - 1000, stats.blockNumber, 500), []) : Promise.resolve([]),
+    stats ? safe(() => detectWhalesInBlockRange(stats.blockNumber - 1000, stats.blockNumber, 500), []) : Promise.resolve([]),
     safe(() => scanSuspiciousActivity(addr), null),
     safe(() => scorePortfolio(addr), null),
     safe(() => rankWalletInEcosystem(wallets, addr), null),

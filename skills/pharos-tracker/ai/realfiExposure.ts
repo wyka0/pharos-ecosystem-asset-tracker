@@ -1,6 +1,7 @@
 import { getProvider } from '../services/rpc.js';
-import { TOKEN_REGISTRY, ERC20 } from '../utils/constants.js';
+import { TOKEN_REGISTRY, ERC20, getProsPrice, getTokenPrice } from '../utils/constants.js';
 import { callContract } from '../services/rpc.js';
+import { formatUnits } from 'ethers';
 
 interface RealFiExposureBreakdown {
   stablecoins: { symbol: string; balance: number; valueUSD: number }[];
@@ -21,9 +22,6 @@ const REALFI_PROTOCOLS = ['RealFi', 'Stablecoin', 'Bridge'];
 
 const REALFI_CATEGORIES: Record<string, string> = {
   USDC: 'Stablecoin (fiat-backed)',
-  WPROS: 'Wrapped Native',
-  LINK: 'Oracle Token',
-  WETH: 'Wrapped Native (cross-chain)',
 };
 
 export async function calculateRealFiExposure(
@@ -36,16 +34,17 @@ export async function calculateRealFiExposure(
     ...Object.entries(TOKEN_REGISTRY).map(async ([addr, meta]) => {
       const raw = await callContract(addr, ERC20.balanceOf(address));
       const bal = raw && raw !== '0x' ? BigInt(raw) : 0n;
-      return { addr, symbol: meta.symbol, balance: Number(bal) / 10 ** meta.decimals, protocol: meta.protocol };
+      return { addr, symbol: meta.symbol, balance: parseFloat(formatUnits(bal, meta.decimals)), protocol: meta.protocol };
     }),
   ]);
 
-  const nativePROS = Number(nativeBal) / 1e18;
+  const nativePROS = parseFloat(formatUnits(nativeBal, 18));
   const stablecoins: { symbol: string; balance: number; valueUSD: number }[] = [];
   const realWorldAssets: { symbol: string; balance: number; protocol: string; category: string }[] = [];
 
+  const prosPrice = await getProsPrice();
   let totalRealFiUSD = 0;
-  let totalPortfolioUSD = nativePROS * 0.614; // PROS at ~$0.614
+  let totalPortfolioUSD = nativePROS * prosPrice;
 
   for (const token of tokenData) {
     if (token.balance <= 0) continue;
@@ -56,35 +55,22 @@ export async function calculateRealFiExposure(
     }
 
     const category = REALFI_CATEGORIES[token.symbol] || 'Other Token';
-    const tokenUSD = token.symbol === 'USDC' ? token.balance : token.symbol === 'WETH' ? token.balance * 1800 : token.balance * 0.614;
+    const tokenLivePrice = await getTokenPrice(token.symbol);
+    const tokenUSD = token.symbol === 'USDC'
+      ? token.balance
+      : tokenLivePrice !== null
+        ? token.balance * tokenLivePrice
+        : token.balance * prosPrice;
     totalPortfolioUSD += tokenUSD;
 
-    if (token.symbol === 'LINK') {
-      stablecoins.push({ symbol: token.symbol, balance: token.balance, valueUSD: token.balance * 14 });
-      totalRealFiUSD += token.balance * 14;
+    if (token.symbol === 'USDC') {
+      realWorldAssets.push({
+        symbol: token.symbol,
+        balance: token.balance,
+        protocol: token.protocol,
+        category,
+      });
     }
-
-    if (REALFI_PROTOCOLS.includes(token.protocol)) {
-      if (!stablecoins.some(s => s.symbol === token.symbol)) {
-        realWorldAssets.push({
-          symbol: token.symbol,
-          balance: token.balance,
-          protocol: token.protocol,
-          category,
-        });
-      }
-    }
-  }
-
-  // Add WPROS as RealFi if held (wrapped variant)
-  const wpros = tokenData.find((t: { symbol: string; balance: number }) => t.symbol === 'WPROS');
-  if (wpros && wpros.balance > 0) {
-    realWorldAssets.push({
-      symbol: 'WPROS',
-      balance: wpros.balance,
-      protocol: 'Bridge',
-      category: 'Wrapped Native (cross-chain)',
-    });
   }
 
   // Native PROS is not RealFi — it's the chain's native gas token

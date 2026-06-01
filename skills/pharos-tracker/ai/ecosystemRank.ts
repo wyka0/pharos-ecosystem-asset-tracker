@@ -1,6 +1,7 @@
 import { getProvider } from '../services/rpc.js';
 import { TOKEN_REGISTRY, ERC20 } from '../utils/constants.js';
 import { callContract } from '../services/rpc.js';
+import { formatUnits } from 'ethers';
 
 interface EcosystemRankEntry {
   address: string;
@@ -31,14 +32,14 @@ export async function rankWalletInEcosystem(
       ...Object.entries(TOKEN_REGISTRY).map(async ([tokenAddr, meta]) => {
         try {
           const raw = await callContract(tokenAddr, ERC20.balanceOf(addr));
-          return raw && raw !== '0x' ? { symbol: meta.symbol, val: Number(BigInt(raw)) / 10 ** meta.decimals } : { symbol: meta.symbol, val: 0 };
+          return raw && raw !== '0x' ? { symbol: meta.symbol, val: parseFloat(formatUnits(BigInt(raw).toString(), meta.decimals)) } : { symbol: meta.symbol, val: 0 };
         } catch {
           return { symbol: meta.symbol, val: 0 };
         }
       }),
     ]);
 
-    const nativePROS = Number(nativeBal) / 1e18;
+    const nativePROS = parseFloat(formatUnits(nativeBal, 18));
     const nonZeroTokens = tokenBals.filter((t: { symbol: string; val: number }) => t.val > 0);
     const usdcHolding = tokenBals.find((t: { symbol: string; val: number }) => t.symbol === 'USDC')?.val || 0;
     const hasDeFi = nonZeroTokens.some((t: { symbol: string; val: number }) => t.symbol !== 'USDC');

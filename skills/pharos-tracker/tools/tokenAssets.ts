@@ -1,7 +1,29 @@
-import { ethers } from 'ethers';
+import { ethers, formatUnits } from 'ethers';
 import { getProvider, callContract } from '../services/rpc.js';
-import { ERC20, TOKEN_REGISTRY } from '../utils/constants.js';
-import { formatUnits } from '../utils/format.js';
+import { ERC20, TOKEN_REGISTRY, getProsPrice } from '../utils/constants.js';
+import { formatUnits as localFormatUnits } from '../utils/format.js';
+
+const MULTICALL3_ADDRESS = "0xcA11bde05977b3631167028862bE2a173976CA11";
+const MULTICALL3_ABI = [
+  "function aggregate(tuple(address target, bytes callData)[] calls) external view returns (uint256 blockNumber, bytes[] returnData)"
+];
+
+async function batchTokenBalances(tokenAddresses: string[], wallet: string, provider: any) {
+  const multicall = new ethers.Contract(MULTICALL3_ADDRESS, MULTICALL3_ABI, provider);
+  const erc20Interface = new ethers.Interface([
+    "function balanceOf(address) view returns (uint256)"
+  ]);
+  const calls = tokenAddresses.map(addr => ({
+    target: addr,
+    callData: erc20Interface.encodeFunctionData("balanceOf", [wallet])
+  }));
+  const result: any = await (multicall as any).callStatic.aggregate(calls);
+  const returnData: string[] = result.returnData;
+  return tokenAddresses.map((addr, i) => {
+    const balance = erc20Interface.decodeFunctionResult("balanceOf", returnData[i])[0];
+    return { address: addr, balance };
+  });
+}
 
 interface TokenBalance {
   address: string;
@@ -21,7 +43,8 @@ export async function getNativeBalance(address: string): Promise<{
   const provider = getProvider();
   const balance = await provider.getBalance(address);
   const formatted = formatUnits(balance, 18);
-  const usdValue = parseFloat(formatted) * 0.614;
+  const prosPrice = await getProsPrice();
+  const usdValue = parseFloat(formatted) * prosPrice;
   return { balance, formatted, usdValue };
 }
 
@@ -30,24 +53,32 @@ export async function getTokenBalances(
   discover: boolean = false
 ): Promise<TokenBalance[]> {
   const results: TokenBalance[] = [];
+  const provider = getProvider();
+  const tokenAddrs = Object.keys(TOKEN_REGISTRY);
 
-  for (const [tokenAddr, meta] of Object.entries(TOKEN_REGISTRY)) {
-    const data = ERC20.balanceOf(address);
-    const raw = await callContract(tokenAddr, data);
+  let batched: Array<{ address: string; balance: bigint }> = [];
+  try {
+    batched = await batchTokenBalances(tokenAddrs, address, provider);
+  } catch (err) {
+    console.warn(`[TokenAssets] Multicall3 batch failed, falling back to sequential: ${(err as Error).message}`);
+    for (const tokenAddr of tokenAddrs) {
+      const raw = await callContract(tokenAddr, ERC20.balanceOf(address));
+      batched.push({ address: tokenAddr, balance: raw && raw !== '0x' ? BigInt(raw) : 0n });
+    }
+  }
 
-    if (raw && raw !== '0x') {
-      const balance = BigInt(raw);
-      if (balance > 0n) {
-        results.push({
-          address: tokenAddr,
-          symbol: meta.symbol,
-          name: meta.name,
-          decimals: meta.decimals,
-          balance,
-          formatted: formatUnits(balance, meta.decimals),
-          protocol: meta.protocol,
-        });
-      }
+  for (const { address: tokenAddr, balance } of batched) {
+    if (balance > 0n) {
+      const meta = TOKEN_REGISTRY[tokenAddr];
+      results.push({
+        address: tokenAddr,
+        symbol: meta.symbol,
+        name: meta.name,
+        decimals: meta.decimals,
+        balance,
+        formatted: formatUnits(balance, meta.decimals),
+        protocol: meta.protocol,
+      });
     }
   }
 
