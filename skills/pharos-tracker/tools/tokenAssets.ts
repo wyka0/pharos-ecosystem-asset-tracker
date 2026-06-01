@@ -135,8 +135,8 @@ async function discoverTokens(address: string): Promise<TokenBalance[]> {
         formatted: formatUnits(balance, decimals),
         protocol: 'Discovered',
       });
-    } catch {
-      // Token doesn't support standard ERC-20 interface
+    } catch (err) {
+      console.warn(`[TokenAssets] Discovery probe failed for ${tokenAddr}: ${(err as Error).message}`);
     }
   }
 
@@ -144,12 +144,18 @@ async function discoverTokens(address: string): Promise<TokenBalance[]> {
 }
 
 function decodeString(hex: string): string {
+  if (!hex || hex === '0x') return '';
   try {
-    const raw = hex.slice(2);
-    const offset = Number(BigInt('0x' + raw.slice(0, 64))) * 2;
-    const len = Number(BigInt('0x' + raw.slice(64, 128))) * 2;
-    const strHex = raw.slice(offset + 64, offset + 64 + len);
-    return Buffer.from(strHex, 'hex').toString('utf-8');
+    const raw = hex.startsWith('0x') ? hex.slice(2) : hex;
+    const offsetBN = BigInt('0x' + raw.slice(0, 64));
+    const lenBN = BigInt('0x' + raw.slice(64, 128));
+    if (offsetBN > BigInt(Number.MAX_SAFE_INTEGER) || lenBN > BigInt(Number.MAX_SAFE_INTEGER)) {
+      return "0x" + raw.slice(128, 128 + 64);
+    }
+    const offset = Number(offsetBN) * 2;
+    const len = Number(lenBN) * 2;
+    const strHex = raw.slice(64 + offset, 64 + offset + len);
+    return Buffer.from(strHex, 'hex').toString('utf-8').replace(/\0+$/, '');
   } catch {
     return '';
   }
