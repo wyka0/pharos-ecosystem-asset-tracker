@@ -23,8 +23,8 @@ jest.mock("ethers", () => {
     ...actual,
     Contract: jest.fn().mockImplementation(() => {
       return {
-        callStatic: {
-          aggregate: jest.fn().mockResolvedValue({
+        aggregate: {
+          staticCall: jest.fn().mockResolvedValue({
             blockNumber: 1n,
             returnData: ["0x0000000000000000000000000000000000000000000000000000000000000000"],
           }),

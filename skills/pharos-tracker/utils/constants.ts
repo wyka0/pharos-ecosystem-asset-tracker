@@ -23,15 +23,19 @@ export const TOKEN_USD_PRICES: Record<string, number> = {
 };
 
 export async function getProsPrice(): Promise<number> {
+  const FALLBACK = 0.614;
   try {
     const res = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=pharos&vs_currencies=usd",
       { signal: AbortSignal.timeout(5000) }
     );
     const data: any = await res.json();
-    return data?.pharos?.usd ?? 0.614;
+    const live = data?.pharos?.usd;
+    if (typeof live !== 'number' || !isFinite(live) || live <= 0) return FALLBACK;
+    if (live > FALLBACK * 10 || live < FALLBACK / 10) return FALLBACK;
+    return live;
   } catch {
-    return 0.614;
+    return FALLBACK;
   }
 }
 

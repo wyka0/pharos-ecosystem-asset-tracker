@@ -17,7 +17,7 @@ async function batchTokenBalances(tokenAddresses: string[], wallet: string, prov
     target: addr,
     callData: erc20Interface.encodeFunctionData("balanceOf", [wallet])
   }));
-  const result: any = await (multicall as any).callStatic.aggregate(calls);
+  const result: any = await (multicall as any).aggregate.staticCall(calls);
   const returnData: string[] = result.returnData;
   return tokenAddresses.map((addr, i) => {
     const balance = erc20Interface.decodeFunctionResult("balanceOf", returnData[i])[0];
