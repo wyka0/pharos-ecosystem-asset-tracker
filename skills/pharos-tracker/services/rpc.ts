@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, formatUnits } from 'ethers';
 import { PHAROS } from '../utils/constants.js';
 
 const RETRIES = 3;
@@ -97,7 +97,8 @@ export async function getLogsBatched(
     try {
       const chunk = await getLogs(current, end, address, topics);
       allLogs.push(...chunk);
-    } catch {
+    } catch (err) {
+      console.warn(`[RPC] getLogsBatched chunk ${current}-${end} failed: ${(err as Error).message}`);
       break;
     }
     current = end + 1;
@@ -109,7 +110,7 @@ export async function getLogsBatched(
 export async function safeBalance(address: string): Promise<number> {
   try {
     const bal = await getBalance(address);
-    return Number(bal) / 1e18;
+    return parseFloat(formatUnits(bal, 18));
   } catch {
     return 0;
   }
