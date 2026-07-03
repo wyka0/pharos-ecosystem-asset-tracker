@@ -81,7 +81,7 @@ export async function getLogs(
   return withRetry(() => provider.getLogs(filter));
 }
 
-const BLOCK_RANGE_LIMIT = 1000;
+const BLOCK_RANGE_LIMIT = 999;
 
 export async function getLogsBatched(
   fromBlock: number,
