@@ -8,7 +8,7 @@ interface DeFiPosition {
   formatted: string;
 }
 
-// Known Pharos protocol addresses (from faroo-xyz/faroo-contracts)
+// Known Pharos protocol addresses (from faroo-xyz/faroo-contracts, docs.aquaflux.pro/developers/contracts.md)
 const PROTOCOLS = [
   {
     name: 'Faroo Liquid Staking',
@@ -22,6 +22,27 @@ const PROTOCOLS = [
     type: 'vault' as const,
     address: '0x36F3d19DDA7ED1428E3014Ae6f2A75D70393B7e6',
     asset: 'PROS',
+    decimals: 18,
+  },
+  {
+    name: 'AquaFlux pALPHA Pool (AqToken)',
+    type: 'lending' as const,
+    address: '0xe150a72352a189dce0d671c08f721b458104a2af',
+    asset: 'AqALPHA',
+    decimals: 18,
+  },
+  {
+    name: 'AquaFlux pALPHA P-Token',
+    type: 'vault' as const,
+    address: '0x34fd642fa9fdc6ce4013d4f3cde575c6dac904f9',
+    asset: 'P-ALPHA',
+    decimals: 18,
+  },
+  {
+    name: 'AquaFlux pALPHA S-Token',
+    type: 'staking' as const,
+    address: '0xBf5761dc90A87976300D3DDCe40B9cBa66b66041',
+    asset: 'S-ALPHA',
     decimals: 18,
   },
 ];

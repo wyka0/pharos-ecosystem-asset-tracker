@@ -92,6 +92,24 @@ export const TOKEN_REGISTRY: Record<string, { symbol: string; name: string; deci
     decimals: 18,
     protocol: 'Liquid Staking',
   },
+  '0xe150a72352a189dce0d671c08f721b458104a2af': {
+    symbol: 'AqALPHA',
+    name: 'AquaFlux AqToken ALPHA',
+    decimals: 18,
+    protocol: 'Lending',
+  },
+  '0x34fd642fa9fdc6ce4013d4f3cde575c6dac904f9': {
+    symbol: 'P-ALPHA',
+    name: 'AquaFlux Principal ALPHA',
+    decimals: 18,
+    protocol: 'Structured',
+  },
+  '0xBf5761dc90A87976300D3DDCe40B9cBa66b66041': {
+    symbol: 'S-ALPHA',
+    name: 'AquaFlux Shield ALPHA',
+    decimals: 18,
+    protocol: 'Structured',
+  },
 };
 
 export const KNOWN_TOKEN_ADDRESSES = Object.keys(TOKEN_REGISTRY);
