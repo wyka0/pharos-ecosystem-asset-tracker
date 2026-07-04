@@ -86,6 +86,12 @@ export const TOKEN_REGISTRY: Record<string, { symbol: string; name: string; deci
     decimals: 18,
     protocol: 'Bridge',
   },
+  '0x6b0a44c64190279f7034b77c13a566e914fe5ec4': {
+    symbol: 'stPROS',
+    name: 'Staked PROS',
+    decimals: 18,
+    protocol: 'Liquid Staking',
+  },
 };
 
 export const KNOWN_TOKEN_ADDRESSES = Object.keys(TOKEN_REGISTRY);

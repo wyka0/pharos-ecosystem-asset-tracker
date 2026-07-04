@@ -8,22 +8,21 @@ interface DeFiPosition {
   formatted: string;
 }
 
-// Known Pharos protocol addresses (from Pharos-Frontend repo)
+// Known Pharos protocol addresses (from faroo-xyz/faroo-contracts)
 const PROTOCOLS = [
   {
-    name: 'PUSD Vault',
+    name: 'Faroo Liquid Staking',
+    type: 'staking' as const,
+    address: '0x6b0a44c64190279f7034b77c13a566e914fe5ec4',
+    asset: 'stPROS',
+    decimals: 18,
+  },
+  {
+    name: 'Faroo Yield Vault 001',
     type: 'vault' as const,
-    address: '0x61edDE0E4B97D878C14F5f5706309d4572550Afa',
-  },
-  {
-    name: 'sPUSD Staking',
-    type: 'staking' as const,
-    address: '0x5CB5cF00d90c1894E10921845a2A8C07E7d6FF97',
-  },
-  {
-    name: 'LST Restaking',
-    type: 'staking' as const,
-    address: '0xBB6f0beF915a4baaF6818c11BFeb648041f70959',
+    address: '0x36F3d19DDA7ED1428E3014Ae6f2A75D70393B7e6',
+    asset: 'PROS',
+    decimals: 18,
   },
 ];
 
@@ -44,9 +43,9 @@ export async function getDeFiPositions(address: string): Promise<DeFiPosition[]>
           results.push({
             protocol: protocol.name,
             type: protocol.type,
-            asset: 'PUSD',
+            asset: protocol.asset,
             balance,
-            formatted: `${(Number(balance) / 1e18).toFixed(4)}`,
+            formatted: `${(Number(balance) / 10 ** protocol.decimals).toFixed(4)}`,
           });
         }
       }
