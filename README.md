@@ -42,16 +42,16 @@ npm run demo -- 0xWalletAddress
 ## Example Agent Queries
 
 ```
-Analyze this wallet
-Generate a portfolio summary
-Detect whale activity
-Scan wallet security risks
-Analyze DAO participation
-Check RealFi exposure
-Show ecosystem ranking
-Generate AI investment insights
-Score this portfolio
-Analyze DeFi activity
+Analyze wallet 0x... on Pharos
+Check portfolio score for wallet 0x...
+Detect whale activity for wallet 0x...
+Scan wallet 0x... for security risks
+Check DAO participation score for 0x...
+What is the RealFi exposure of wallet 0x...
+Show ecosystem ranking for wallet 0x...
+Give me investment insights for wallet 0x...
+Score the portfolio of wallet 0x...
+Summarize DeFi activity for wallet 0x...
 ```
 
 ## Repository Structure
@@ -63,6 +63,7 @@ Analyze DeFi activity
 ├── tsconfig.json              # TypeScript config
 ├── LICENSE                    # MIT license
 ├── README.md
+├── SKILL.md               # Root-level skill manifest (Anvita Flow)
 │
 └── skills/pharos-tracker/     # Composable skill directory
     ├── SKILL.md               # Skill capabilities and triggers
@@ -84,7 +85,7 @@ Analyze DeFi activity
                     └──────────┬──────────┘
                                │
               ┌────────────────▼────────────────┐
-              │    Agent Runtime (opencode)      │
+               │  Agent Runtime (Anvita Flow / opencode)  │
               └────────────────┬─────────────────┘
                                │
         ┌──────────────────────┼──────────────────────┐
