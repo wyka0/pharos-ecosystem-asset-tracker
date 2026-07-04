@@ -1,6 +1,7 @@
 import { getProvider } from '../services/rpc.js';
 import { TOKEN_REGISTRY, ERC20, getProsPrice, getTokenPrice } from '../utils/constants.js';
 import { callContract } from '../services/rpc.js';
+import { getDeFiPositions } from '../tools/defiPositions.js';
 import { formatUnits } from 'ethers';
 
 interface PortfolioScoreBreakdown {
@@ -17,6 +18,7 @@ interface PortfolioScoreResult {
   grade: 'A' | 'B' | 'C' | 'D' | 'F';
   strengths: string[];
   weaknesses: string[];
+  defiPositionsCount: number;
 }
 
 export async function scorePortfolio(address: string): Promise<PortfolioScoreResult> {
@@ -32,6 +34,7 @@ export async function scorePortfolio(address: string): Promise<PortfolioScoreRes
 
   const nativeValue = parseFloat(formatUnits(nativeBal, 18));
   const tokenBalances = tokenData.filter((t: { balance: bigint }) => t.balance > 0n);
+  const defiPositions = await getDeFiPositions(address);
 
   // Diversification: number of asset types held
   const assetCount = (nativeValue > 0 ? 1 : 0) + tokenBalances.length;
@@ -69,10 +72,19 @@ export async function scorePortfolio(address: string): Promise<PortfolioScoreRes
   // Activity score (estimated from token count + native)
   const activity = Math.min(100, assetCount * 20);
 
-  // DeFi participation
-  const defiTokens = tokenBalances.filter((t: { protocol: string }) => t.protocol !== 'Stablecoin' && t.protocol !== 'Bridge');
-  const defiParticipation = Math.min(100, defiTokens.length * 33);
-  if (defiTokens.length > 0) strengths.push('Active in DeFi protocols');
+  // DeFi participation (based on active positions)
+  const defiPosCount = defiPositions.length;
+  let defiParticipation = 0;
+  if (defiPosCount === 0) {
+    defiParticipation = 0;
+  } else if (defiPosCount === 1) {
+    defiParticipation = 40;
+  } else if (defiPosCount === 2) {
+    defiParticipation = 70;
+  } else {
+    defiParticipation = 100;
+  }
+  if (defiPositions.length > 0) strengths.push(`Active in ${defiPositions.length} DeFi position(s)`);
 
   // Overall composite
   const overall = Math.max(0, Math.min(100,
@@ -88,6 +100,7 @@ export async function scorePortfolio(address: string): Promise<PortfolioScoreRes
     grade,
     strengths: strengths.length > 0 ? strengths : ['Start building your portfolio'],
     weaknesses: weaknesses.length > 0 ? weaknesses : ['None identified'],
+    defiPositionsCount: defiPositions.length,
   };
 }
 
