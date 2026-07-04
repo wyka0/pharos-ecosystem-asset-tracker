@@ -87,7 +87,7 @@ export async function detectWhalesInBlockRange(
 }
 
 export async function analyzeWhale(address: string): Promise<WhaleProfile> {
-  const blocksToScan = 10000;
+  const blocksToScan = 999;
   const provider = getProvider();
   const currentBlock = await provider.getBlockNumber();
   const fromBlock = currentBlock - blocksToScan;
