@@ -1,5 +1,5 @@
 import { ethers, formatUnits } from 'ethers';
-import { getProvider, callContract } from '../services/rpc.js';
+import { getProvider, callContract, getLogsBatched } from '../services/rpc.js';
 import { ERC20, TOKEN_REGISTRY, getProsPrice } from '../utils/constants.js';
 import { formatUnits as localFormatUnits } from '../utils/format.js';
 
@@ -93,18 +93,14 @@ export async function getTokenBalances(
 async function discoverTokens(address: string): Promise<TokenBalance[]> {
   const provider = getProvider();
   const currentBlock = await provider.getBlockNumber();
-  const fromBlock = currentBlock - 1000;
+  const fromBlock = currentBlock - 9999;
 
   const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
   const paddedAddr = `0x000000000000000000000000${address.replace('0x', '').toLowerCase()}`;
 
-  const filter: ethers.Filter = {
-    fromBlock,
-    toBlock: currentBlock,
-    topics: [transferTopic, null, null, paddedAddr],
-  };
-
-  const logs = await provider.getLogs(filter);
+  // ERC-20 Transfer(address,address,uint256) has 3 indexed topics: [sig, from, to]
+  // Use getLogsBatched to stay under the RPC hard cap of 1,000 blocks per request
+  const logs = await getLogsBatched(fromBlock, currentBlock, undefined, [transferTopic, null, paddedAddr]);
   const seen = new Set<string>();
   const discovered: TokenBalance[] = [];
 
